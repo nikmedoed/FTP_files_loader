@@ -14,10 +14,10 @@ class Config:
     target_path: str = "videos"
 
 
-def readconfig(file="config.ini") -> Config:
+def readconfig(file=f"{os.path.dirname(os.path.abspath(__file__))}/config.ini") -> Config:
     conf = configparser.ConfigParser(allow_no_value=True)
     conf.read(file)
-    return conf.has_section('main') and Config(**conf['main'])
+    return Config(**conf['main'])
 
 
 def fileslist(ftp):
@@ -37,6 +37,7 @@ def fileslist(ftp):
 
 
 def tranfer_files_ftp(conf):
+    print(conf.target_path)
     if not os.path.exists(conf.target_path):
         os.mkdir(conf.target_path)
 

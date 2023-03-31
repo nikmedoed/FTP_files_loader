@@ -10,5 +10,5 @@ Examplet cron task:
 ```shell
 >>> crontab -e
 
-0 */12 * * * python $HOME/exec/ftpLoad/FTPtoSystem.py
+0 */12 * * * python3 $HOME/exec/ftpLoad/FTPtoSystem.py
 ```
