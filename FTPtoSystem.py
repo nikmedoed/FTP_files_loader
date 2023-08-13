@@ -53,8 +53,16 @@ def tranfer_files_ftp(conf):
             try:
                 with open(f'{conf.target_path}/{os.path.basename(file)}', 'wb') as local_file:
                     ftp.retrbinary('RETR ' + file, local_file.write)
-                ftp.delete(file)
-                print(f"transfer ok: {file}")
+
+                local_file_path = f'{conf.target_path}/{os.path.basename(file)}'
+                local_file_size = os.path.getsize(local_file_path)
+                ftp_file_size = ftp.size(file)
+
+                if local_file_size == ftp_file_size and local_file_size != 0:
+                    # ftp.delete(file)
+                    print(f"transfer and verification ok: {file}")
+                else:
+                    print(f"verification failed: {file}")
             except Exception as e:
                 print(f"transfer error: {file}, {e}")
 

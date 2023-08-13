@@ -127,3 +127,4 @@ dmypy.json
 # dev
 *.sqlite3
 config.ini
+config_2.ini
