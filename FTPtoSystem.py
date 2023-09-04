@@ -59,7 +59,7 @@ def tranfer_files_ftp(conf):
                 ftp_file_size = ftp.size(file)
 
                 if local_file_size == ftp_file_size and local_file_size != 0:
-                    # ftp.delete(file)
+                    ftp.delete(file)
                     print(f"transfer and verification ok: {file}")
                 else:
                     print(f"verification failed: {file}")
