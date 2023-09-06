@@ -41,7 +41,7 @@ def tranfer_files_ftp(conf):
     if not os.path.exists(conf.target_path):
         os.mkdir(conf.target_path)
 
-    with ftplib.FTP() as ftp:
+    with ftplib.FTP(timeout=60) as ftp:
         ftp.connect(conf.host, int(conf.port))
         ftp.login(user=conf.user, passwd=conf.password)
         ftp.cwd(conf.source_path)
@@ -51,18 +51,19 @@ def tranfer_files_ftp(conf):
 
         for file in files:
             try:
-                with open(f'{conf.target_path}/{os.path.basename(file)}', 'wb') as local_file:
+                ftp.voidcmd('TYPE I')
+                ftp_file_size = ftp.size(file)
+                local_file_path = f'{conf.target_path}/{os.path.basename(file)}'
+                with open(local_file_path, 'wb') as local_file:
                     ftp.retrbinary('RETR ' + file, local_file.write)
 
-                local_file_path = f'{conf.target_path}/{os.path.basename(file)}'
                 local_file_size = os.path.getsize(local_file_path)
-                ftp_file_size = ftp.size(file)
-
-                if local_file_size == ftp_file_size and local_file_size != 0:
+                if local_file_size == ftp_file_size:
+                    print(f"transfer and validation - ok: {file}")
                     ftp.delete(file)
-                    print(f"transfer and verification ok: {file}")
                 else:
-                    print(f"verification failed: {file}")
+                    print(f"validation failed: {file}")
+                    os.remove(local_file_path)
             except Exception as e:
                 print(f"transfer error: {file}, {e}")
 
