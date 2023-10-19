@@ -2,16 +2,31 @@ import ftplib
 import os
 import configparser
 from dataclasses import dataclass
+import requests
+import traceback
 
 
 @dataclass
 class Config:
     host: str
+    telegram_token: str
+    telegram_chat_id: str
     port: int = 21
     user: str = ""
     password: str = ""
     source_path: str = ''
     target_path: str = "videos"
+
+
+def send_telegram_message(conf, message):
+    url = f"https://api.telegram.org/bot{conf.telegram_token}/sendMessage"
+    payload = {
+        "chat_id": conf.telegram_chat_id,
+        "text": message
+    }
+    response = requests.post(url, json=payload)
+    if response.status_code != 200:
+        print(f"Failed to send message: {response.content}")
 
 
 def readconfig(file=f"{os.path.dirname(os.path.abspath(__file__))}/config.ini") -> Config:
@@ -65,9 +80,16 @@ def tranfer_files_ftp(conf):
                     print(f"validation failed: {file}")
                     os.remove(local_file_path)
             except Exception as e:
-                print(f"transfer error: {file}, {e}")
+                error_message = f"FTPloader\nTransfer error: {file}, {e}"
+                print(error_message)
+                send_telegram_message(conf, error_message)  # Отправка сообщения в Telegram при возникновении ошибки
 
 
 if __name__ == "__main__":
     conf = readconfig()
-    tranfer_files_ftp(conf)
+    try:
+        tranfer_files_ftp(conf)
+    except Exception as e:
+        error_message = f"FTPloader\nError: {e}\n\nTraceback: {traceback.format_exc()}"
+        print(error_message)
+        send_telegram_message(conf, error_message)
